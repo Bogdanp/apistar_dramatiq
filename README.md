@@ -5,7 +5,8 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/9848a606e3332b808329/maintainability)](https://codeclimate.com/github/Bogdanp/apistar_dramatiq/maintainability)
 [![PyPI version](https://badge.fury.io/py/apistar-dramatiq.svg)](https://badge.fury.io/py/apistar-dramatiq)
 
-[Dramatiq] integration for [API Star] apps.
+[Dramatiq] integration for [API Star] apps.  Adds support for using
+dependency injection inside Dramatiq actors.
 
 
 ## Requirements
@@ -19,6 +20,19 @@
 Use [pipenv] (or plain pip) to install the package:
 
     pipenv install apistar_dramatiq
+
+Then use `apistar_dramatiq.actor` in place of `dramatiq.actor`
+wherever you want dependency injection:
+
+``` python
+from apistar import Settings
+from apistar_dramatiq import actor
+
+
+@actor(queue_name="example")
+def print_settings(settings: Settings):
+    print(settings)
+```
 
 
 ## License

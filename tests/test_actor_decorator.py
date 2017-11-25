@@ -1,10 +1,10 @@
-import apistar_dramatiq
 import dramatiq
 import pytest
 
 from apistar import Route, Settings
 from apistar.frameworks.wsgi import WSGIApp as App
 from apistar.test import TestClient
+from apistar_dramatiq import actor
 from dramatiq.brokers.stub import StubBroker
 from unittest.mock import PropertyMock, call, patch
 
@@ -38,7 +38,7 @@ app = App(
 )
 
 
-@apistar_dramatiq.actor(app=app)
+@actor(app=app)
 def log_inputs(x, y, settings: Settings):
     log_inputs.logger.info(x)
     log_inputs.logger.info(y)
@@ -49,7 +49,7 @@ class SomeComponent:
     pass
 
 
-@apistar_dramatiq.actor(app=app, max_retries=0)
+@actor(app=app, max_retries=0)
 def missing_dep(idontexist: SomeComponent):
     pass
 
