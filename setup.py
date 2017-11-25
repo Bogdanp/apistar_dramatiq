@@ -25,8 +25,8 @@ setup(
     long_description="Visit https://github.com/Bogdanp/apistar_dramatiq for more information.",
     packages=["apistar_dramatiq"],
     include_package_data=True,
-    install_requires={
-        "apistar": ">=0.3",
-        "dramatiq": ">=0.15",
-    },
+    install_requires=[
+        "apistar>=0.3",
+        "dramatiq>=0.15",
+    ],
 )
