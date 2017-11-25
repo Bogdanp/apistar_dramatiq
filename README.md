@@ -1,8 +1,8 @@
 # apistar_dramatiq
 
 [![Build Status](https://travis-ci.org/Bogdanp/apistar_dramatiq.svg?branch=master)](https://travis-ci.org/Bogdanp/apistar_dramatiq)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/bf3853435dc643c96208/test_coverage)](https://codeclimate.com/github/Bogdanp/apistar_dramatiq/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/bf3853435dc643c96208/maintainability)](https://codeclimate.com/github/Bogdanp/apistar_dramatiq/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/9848a606e3332b808329/test_coverage)](https://codeclimate.com/github/Bogdanp/apistar_dramatiq/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/9848a606e3332b808329/maintainability)](https://codeclimate.com/github/Bogdanp/apistar_dramatiq/maintainability)
 [![PyPI version](https://badge.fury.io/py/apistar-dramatiq.svg)](https://badge.fury.io/py/apistar-dramatiq)
 
 [Dramatiq] integration for [API Star] apps.
