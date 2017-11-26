@@ -35,6 +35,13 @@ def print_settings(settings: Settings):
 ```
 
 
+## Limitations
+
+Actors that use the decorator cannot use `*args` and `**kwargs` in
+their function signatures and class-based actors are not currently
+supported.
+
+
 ## License
 
 apistar_dramatiq is licensed under Apache 2.0.  Please see [LICENSE]
