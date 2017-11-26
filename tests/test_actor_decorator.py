@@ -1,69 +1,28 @@
 import dramatiq
 import pytest
 
-from apistar import Route, Settings
-from apistar.frameworks.wsgi import WSGIApp as App
 from apistar.test import TestClient
-from apistar_dramatiq import actor
-from dramatiq.brokers.stub import StubBroker
 from unittest.mock import PropertyMock, call, patch
 
-broker = StubBroker()
-broker.emit_after("process_boot")
-dramatiq.set_broker(broker)
-
-
-def log():
-    log_inputs.send(1, y=2)
-    return {}
-
-
-def missing():
-    missing_dep.send()
-    return {}
-
-
-routes = [
-    Route("/log", "GET", log),
-    Route("/missing", "GET", missing),
-]
-
-settings = {
-    "EXAMPLE": 42
-}
-
-app = App(
-    routes=routes,
-    settings=settings,
-)
-
-
-@actor(app=app)
-def log_inputs(x, y, settings: Settings):
-    log_inputs.logger.info(x)
-    log_inputs.logger.info(y)
-    log_inputs.logger.info(settings)
-
-
-class SomeComponent:
-    pass
-
-
-@actor(app=app, max_retries=0)
-def missing_dep(idontexist: SomeComponent):
-    pass
+from .app import app, broker as _broker, log_inputs, settings, missing_dep
 
 
 @pytest.fixture
-def worker():
+def broker():
+    _broker.flush_all()
+    yield _broker
+
+
+@pytest.fixture
+def worker(broker):
     worker = dramatiq.Worker(broker, worker_timeout=100)
     worker.start()
     yield worker
     worker.stop()
 
 
-@patch("tests.test_actor_decorator.log_inputs.logger", new_callable=PropertyMock)
-def test_can_inject_params(logger_mock, worker):
+@patch("tests.app.log_inputs.logger", new_callable=PropertyMock)
+def test_can_inject_params(logger_mock, broker, worker):
     # Given an apistar app client
     # And a mocked actor logger
     client = TestClient(app)
@@ -84,7 +43,7 @@ def test_can_inject_params(logger_mock, worker):
     ])
 
 
-def test_can_fail_to_inject_params(worker):
+def test_can_fail_to_inject_params(broker, worker):
     # Given an apistar app client
     client = TestClient(app)
 

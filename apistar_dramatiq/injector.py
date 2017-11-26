@@ -39,7 +39,7 @@ class FnResolver(Resolver):
                 return args[poss[name]]
             except (KeyError, IndexError):
                 msg = "Injector could not resolve parameter %r" % name
-                raise CouldNotResolveDependency(msg)
+                raise CouldNotResolveDependency(msg) from None
 
 
 def get_injector(app=None):
