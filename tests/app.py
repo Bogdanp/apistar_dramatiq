@@ -1,7 +1,7 @@
+import apistar_dramatiq
 import dramatiq
 
-from apistar import Route, Settings
-from apistar.frameworks.wsgi import WSGIApp as App
+from apistar import App, Component, Route
 from apistar_dramatiq import actor
 from dramatiq.brokers.stub import StubBroker
 
@@ -10,8 +10,17 @@ broker.emit_after("process_boot")
 dramatiq.set_broker(broker)
 
 
-class SomeComponent:
+class Settings(dict):
     pass
+
+
+class MissingDep:
+    pass
+
+
+class SettingsComponent(Component):
+    def resolve(self) -> Settings:
+        return {"EXAMPLE": 42}
 
 
 def log():
@@ -25,27 +34,26 @@ def missing():
 
 
 routes = [
-    Route("/log", "GET", log),
-    Route("/missing", "GET", missing),
+    Route("/log", method="GET", handler=log),
+    Route("/missing", method="GET", handler=missing),
 ]
 
-settings = {
-    "EXAMPLE": 42
-}
+components = [
+    SettingsComponent(),
+]
 
-app = App(
-    routes=routes,
-    settings=settings,
-)
+app = App(routes=routes, components=components)
+apistar_dramatiq.setup(components)
 
 
-@actor(app=app)
-def log_inputs(x, y, settings: Settings):
+@actor
+def log_inputs(x, y, settings: Settings, z=42):
     log_inputs.logger.info(x)
     log_inputs.logger.info(y)
+    log_inputs.logger.info(z)
     log_inputs.logger.info(settings)
 
 
-@actor(app=app, max_retries=0)
-def missing_dep(idontexist: SomeComponent):
+@actor(max_retries=0)
+def missing_dep(idontexist: MissingDep):
     pass

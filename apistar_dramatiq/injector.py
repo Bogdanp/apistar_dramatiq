@@ -1,93 +1,68 @@
-import apistar
 import functools
 import inspect
-import typing
 
-from apistar.components import dependency
-from apistar.exceptions import CouldNotResolveDependency
-from apistar.interfaces import Resolver
-from apistar.types import KeywordArgs, ParamName
-from threading import Lock
+from apistar import Component
+from apistar.server.injector import Injector
+from inspect import Parameter
+from typing import Any, Callable, Dict, Iterable, List, Optional
 
-#: Instantiating and running an injector for the first time takes on
-#: the order of 30ms so we need to cache it globally.
-_injector = None
-_injector_mutex = Lock()
+#: The type of component lists.
+Components = List[Component]
 
-
-#: A mapping from positional argument names to their positions in the
-#: signature.
-ArgPositions = typing.Dict[str, int]
-
-#: A list of positional argument names.
-PositionalArgs = typing.Iterable[str]
+#: The global list of components.
+_components: Components = []
 
 
-class FnResolver(Resolver):
-    def resolve(self, param, func):
-        return (f"fnarg:{param.name}", self.get_arg)
-
-    def get_arg(self,
-                name: ParamName,
-                poss: ArgPositions,
-                args: PositionalArgs,
-                kwargs: KeywordArgs) -> typing.Any:
-        try:
-            return kwargs[name]
-        except KeyError:
-            try:
-                return args[poss[name]]
-            except (KeyError, IndexError):
-                msg = "Injector could not resolve parameter %r" % name
-                raise CouldNotResolveDependency(msg) from None
+def setup(components: Components) -> None:
+    """Set up the list of components that may be dependency injected.
+    """
+    global _components
+    _components = components
 
 
-def get_injector(app=None):
-    global _injector
-
-    if not _injector:
-        with _injector_mutex:
-            if not _injector:
-                app = app or apistar.get_current_app()
-                _injector = dependency.DependencyInjector(
-                    components=app.components,
-                    initial_state=app.preloaded_state,
-                    required_state={
-                        ArgPositions: "poss",
-                        PositionalArgs: "args",
-                        KeywordArgs: "kwargs",
-                    },
-                    resolvers=[FnResolver()],
-                )
-
-    return _injector
-
-
-def inject(fn=None, *, app=None):
+def inject(fn: Optional[Callable[..., Any]] = None, *, components: Optional[Components] = None) -> Callable[..., Any]:
     """Makes any callable dependency-injectable.
 
     Parameters:
-      fn(callable): The callable to decorate.
-      app(apistar.App): The application to use for DI.  If this is not
-        provided, the app will be looked up dynamically.
+      fn: The callable to decorate.
+      components: The components that may be injected.
 
     Returns:
-      callable
+      Either a decorator or a decorated function whose parameters can
+      be dependency-injected.
     """
     def decorator(fn):
-        # Precompute posargs positions in the signature.
-        poss = {param: i for i, param in enumerate(inspect.signature(fn).parameters)}
+        parameters = {name: i for i, name in enumerate(inspect.signature(fn).parameters)}
 
         @functools.wraps(fn)
         def wrapper(*args, **kwargs):
-            return get_injector(app).run(fn, {
-                "poss": poss,
-                "args": args,
-                "kwargs": kwargs,
-            })
+            resolver = _ArgumentResolver(parameters, args, kwargs)
+            injector = Injector([resolver, *(components or _components)], {})
+            return injector.run([fn], {})
 
         return wrapper
 
     if fn is None:
         return decorator
     return decorator(fn)
+
+
+class _ArgumentResolver(Component):
+    def __init__(self, parameters: Dict[str, int], args: Iterable[Any], kwargs: Dict[str, Any]) -> None:
+        self.state = state = kwargs
+        for name, idx in parameters.items():
+            if name not in state:
+                try:
+                    state[name] = args[idx]
+                except IndexError:
+                    continue
+
+    def can_handle_parameter(self, parameter: Parameter) -> bool:
+        return parameter.name in self.state or parameter.default is not Parameter.empty
+
+    # Return annotation can be Any because we're overwriting can_handle_parameter.
+    def resolve(self, parameter: Parameter) -> Any:
+        try:
+            return self.state[parameter.name]
+        except KeyError:
+            return parameter.default

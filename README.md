@@ -11,8 +11,8 @@ dependency injection inside Dramatiq actors.
 
 ## Requirements
 
-* [API Star] 0.3+
-* [Dramatiq] 0.15+
+* [API Star] 0.4+
+* [Dramatiq] 1.0.0+
 
 
 ## Installation
@@ -21,24 +21,19 @@ Use [pipenv] (or plain pip) to install the package:
 
     pipenv install apistar_dramatiq
 
-Then use `apistar_dramatiq.actor` in place of `dramatiq.actor`
-wherever you want dependency injection:
+You can then use `apistar_dramatiq.actor` in place of `dramatiq.actor`
+wherever you need dependency-injected components.  Don't forget to
+call `apistar_dramatiq.setup` after you initialize your components.
 
-``` python
-from apistar import Settings
-from apistar_dramatiq import actor
+See [example.py] for a minimal example.
 
-
-@actor(queue_name="example")
-def print_settings(settings: Settings):
-    print(settings)
-```
+[example.py]: https://github.com/Bogdanp/apistar_dramatiq/blob/master/example.py
 
 
 ## Limitations
 
-Actors that use the decorator cannot use `*args` and `**kwargs` in
-their function signatures and class-based actors are not currently
+Actors that use dependency injection cannot use `*args` and `**kwargs`
+in their function signatures and class-based actors are not currently
 supported.
 
 
