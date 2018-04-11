@@ -4,12 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-apistar = {git = "https://github.com/encode/apistar.git", editable = true, ref = "level-up"}
+apistar = "==0.4"
 dramatiq = "*"
 
 [dev-packages]
+bumpversion = "*"
+gunicorn = "*"
 pytest = "*"
 pytest-cov = "*"
 twine = "*"
-bumpversion = "*"
-gunicorn = "*"

@@ -42,7 +42,7 @@ def inject(fn: Optional[Callable[..., Any]] = None, *, components: Optional[Comp
 
         return wrapper
 
-    if fn is None:
+    if fn is None:  # pragma: no cover
         return decorator
     return decorator(fn)
 

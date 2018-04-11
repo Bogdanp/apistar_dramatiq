@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "48fd73fe2f736b6f8877fb2c36feac19f6840cd0e9e63a548e14bddd391af5de"
+            "sha256": "29d6937faee420d63c26b02801fe16d5e0d53b0ed68d6c5c53def553ff820f42"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -15,14 +15,11 @@
     },
     "default": {
         "apistar": {
-            "editable": true,
-            "git": "https://github.com/encode/apistar.git",
-            "ref": "d4490d2485ea3c5e8a71349219bdbba6dc4d60d6"
-        },
-        "apistar-dramatiq": {
-            "editable": true,
-            "git": "git@github.com:Bogdanp/apistar_dramatiq.git",
-            "ref": "2cf92eb6d930d3cead6b72f8075eb82489ed11ac"
+            "hashes": [
+                "sha256:da2a33c5ecc996f47ffa2d53393dd764be5dc4ee85f1b06f201044dd01b2dff1"
+            ],
+            "index": "pypi",
+            "version": "==0.4"
         },
         "argh": {
             "hashes": [
